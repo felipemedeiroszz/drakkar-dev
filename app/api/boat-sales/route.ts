@@ -1,7 +1,17 @@
 import { type NextRequest, NextResponse } from "next/server"
 import { createClient } from "@supabase/supabase-js"
 
-const supabase = createClient(process.env.SUPABASE_URL!, process.env.SUPABASE_ANON_KEY!)
+// Verificando se as variáveis de ambiente estão definidas
+const supabaseUrl = process.env.SUPABASE_URL;
+const supabaseKey = process.env.SUPABASE_ANON_KEY;
+
+if (!supabaseUrl || !supabaseKey) {
+  console.error("Erro: SUPABASE_URL ou SUPABASE_ANON_KEY estão ausentes");
+  throw new Error("SUPABASE_URL ou SUPABASE_ANON_KEY não estão definidos nas variáveis de ambiente");
+}
+
+// Inicializando o cliente do Supabase
+const supabase = createClient(supabaseUrl, supabaseKey)
 
 export async function GET(request: NextRequest) {
   try {
@@ -19,13 +29,13 @@ export async function GET(request: NextRequest) {
       .order("updated_at", { ascending: false })
 
     if (error) {
-      console.error("Error fetching boat sales:", error)
+      console.error("Erro ao buscar as vendas de barcos:", error)
       return NextResponse.json({ success: false, error: error.message }, { status: 500 })
     }
 
     return NextResponse.json({ success: true, data: data || [] })
   } catch (error) {
-    console.error("Error in boat sales GET:", error)
+    console.error("Erro na rota GET de boat-sales:", error)
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 })
   }
 }
@@ -65,13 +75,13 @@ export async function POST(request: NextRequest) {
       .select()
 
     if (error) {
-      console.error("Error saving boat sale:", error)
+      console.error("Erro ao salvar a venda do barco:", error)
       return NextResponse.json({ success: false, error: error.message }, { status: 500 })
     }
 
     return NextResponse.json({ success: true, data })
   } catch (error) {
-    console.error("Error in boat sales POST:", error)
+    console.error("Erro na rota POST de boat-sales:", error)
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 })
   }
 }
@@ -89,13 +99,13 @@ export async function DELETE(request: NextRequest) {
     const { error } = await supabase.from("boat_sales").delete().eq("id", id).eq("dealer_name", dealerName)
 
     if (error) {
-      console.error("Error deleting boat sale:", error)
+      console.error("Erro ao deletar a venda do barco:", error)
       return NextResponse.json({ success: false, error: error.message }, { status: 500 })
     }
 
     return NextResponse.json({ success: true })
   } catch (error) {
-    console.error("Error in boat sales DELETE:", error)
+    console.error("Erro na rota DELETE de boat-sales:", error)
     return NextResponse.json({ success: false, error: "Internal server error" }, { status: 500 })
   }
 }
